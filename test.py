@@ -2,6 +2,7 @@ from pybit.unified_trading import HTTP
 import time
 
 # Set API key and secret
+# testnet api keys
 api_key = "UAD2faj813tVHtu5n4"
 api_secret = "Nj7IlRSXPW3drJno53KzKzt8X2s3zi64Nbj8"
 
