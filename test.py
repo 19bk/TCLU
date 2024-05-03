@@ -91,4 +91,4 @@ def continuous_monitoring(interval_seconds):
         time.sleep(interval_seconds)
 
 # Start continuous monitoring
-continuous_monitoring(0.25)  # Check every 60 seconds (adjust interval as needed)
+continuous_monitoring(0.375)  # Check every 60 seconds (adjust interval as needed)
