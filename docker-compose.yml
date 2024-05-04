@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  my_script:
+    build: .
+    command: python main.py
+    volumes:
+      - ./:/app
