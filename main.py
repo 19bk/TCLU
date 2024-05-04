@@ -1,6 +1,7 @@
 from pybit.unified_trading import HTTP
 import time
 import concurrent.futures
+from tabulate import tabulate
 
 # Set API keys and secrets
 apis = [
@@ -64,10 +65,12 @@ def continuous_monitoring(interval_seconds):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(get_open_positions, api): api["name"] for api in apis}
 
+            # Collect output data
+            output_data = []
+
             for future in concurrent.futures.as_completed(futures):
                 api_name = futures[future]
                 current_positions = frozenset(future.result())
-                print(f"Current open positions for API ({api_name}): {current_positions}")
 
                 # Find positions that no longer exist
                 closed_positions = previous_positions[api_name] - current_positions
@@ -78,7 +81,14 @@ def continuous_monitoring(interval_seconds):
 
                 previous_positions[api_name] = current_positions
 
+                # Add output data for the table
+                output_data.append([api_name, list(current_positions)])
+
+            # Print the table
+            print("\nCurrent open positions:")
+            print(tabulate(output_data, headers=["API", "Positions"], tablefmt="grid"))
+
         time.sleep(interval_seconds)
 
 # Start continuous monitoring
-continuous_monitoring(0.25)  # Check every 60 seconds (adjust interval as needed)
+continuous_monitoring(0.375)  # Check every 60 seconds (adjust interval as needed)
