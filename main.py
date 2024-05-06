@@ -12,15 +12,27 @@ apis = [
         "testnet": True,
     },
     {
-        "name": "Sub-account",
+        "name": "MAIN1",
+        "api_key": "d2PdeMd88jrONugpE7",
+        "api_secret": "lem9OCVuggIMnN8gTna94FV2a9RWune4Z588",
+        "testnet": False,
+    }, 
+    {
+        "name": "TCLU1",
         "api_key": "LkBKjLHEoRwQTXwj7z",
         "api_secret": "PIyBgeezw5IemGmCLJzg0S4KK39aXKI2RXsY",
         "testnet": False,
     },
     {
-        "name": "Main account TCLU",
-        "api_key": "d2PdeMd88jrONugpE7",
-        "api_secret": "lem9OCVuggIMnN8gTna94FV2a9RWune4Z588",
+        "name": "TCLU2",
+        "api_key": "mqQhoJyyYk1jaSxDhX",
+        "api_secret": "Y8kqfcWpeNSfFaNVHwgv7A67Q86EchDWYINs",
+        "testnet": False,
+    },
+    {
+        "name": "TCLU3",
+        "api_key": "nypN6qzzCvlV7nfrZv",
+        "api_secret": "jypO1FjqTMusEMCXMjYb3w4mZJLINSYqVgoL",
         "testnet": False,
     },
 ]

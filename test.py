@@ -2,6 +2,8 @@ from pybit.unified_trading import HTTP
 import time
 import concurrent.futures
 from tabulate import tabulate
+from pybit.exceptions import FailedRequestError
+
 
 # Set API keys and secrets
 apis = [
@@ -12,15 +14,27 @@ apis = [
         "testnet": True,
     },
     {
-        "name": "Sub-account",
+        "name": "MAIN1",
+        "api_key": "d2PdeMd88jrONugpE7",
+        "api_secret": "lem9OCVuggIMnN8gTna94FV2a9RWune4Z588",
+        "testnet": False,
+    }, 
+    {
+        "name": "TCLU1",
         "api_key": "LkBKjLHEoRwQTXwj7z",
         "api_secret": "PIyBgeezw5IemGmCLJzg0S4KK39aXKI2RXsY",
         "testnet": False,
     },
     {
-        "name": "Main account TCLU",
-        "api_key": "d2PdeMd88jrONugpE7",
-        "api_secret": "lem9OCVuggIMnN8gTna94FV2a9RWune4Z588",
+        "name": "TCLU2",
+        "api_key": "mqQhoJyyYk1jaSxDhX",
+        "api_secret": "Y8kqfcWpeNSfFaNVHwgv7A67Q86EchDWYINs",
+        "testnet": False,
+    },
+    {
+        "name": "TCLU3",
+        "api_key": "nypN6qzzCvlV7nfrZv",
+        "api_secret": "jypO1FjqTMusEMCXMjYb3w4mZJLINSYqVgoL",
         "testnet": False,
     },
 ]
@@ -33,13 +47,30 @@ def get_open_positions(api):
         api_secret=api["api_secret"],
     )
 
-    response = session.get_positions(category="linear", settleCoin="USDT")
-    if response["retCode"] == 0:
-        return [position["symbol"] for position in response["result"]["list"]]
-    else:
-        print("Failed to get open positions.")
-        print("Error message:", response["retMsg"])
-        return []
+    backoff_factor = 0.1  # Initial backoff time in seconds
+    max_retries = 5       # Maximum number of retries
+
+    for _ in range(max_retries):
+        try:
+            response = session.get_positions(category="linear", settleCoin="USDT")
+            if response["retCode"] == 0:
+                return [position["symbol"] for position in response["result"]["list"]]
+            else:
+                print("Failed to get open positions.")
+                print("Error message:", response["retMsg"])
+                return []
+        except FailedRequestError as e:
+            print(f"Failed request: {e}. Retrying in {backoff_factor} seconds...")
+            time.sleep(backoff_factor)
+            backoff_factor *= 2  # Double the backoff time for the next retry
+        except Exception as e:
+            print(f"Unexpected error: {e}. Retrying in {backoff_factor} seconds...")
+            time.sleep(backoff_factor)
+            backoff_factor *= 2  # Double the backoff time for the next retry
+
+    print("Retries exceeded maximum. Aborting the request.")
+    return []
+
 
 # Function to cancel all orders for a list of symbols
 def cancel_all_orders(api, symbols):
@@ -91,4 +122,4 @@ def continuous_monitoring(interval_seconds):
         time.sleep(interval_seconds)
 
 # Start continuous monitoring
-continuous_monitoring(0.375)  # Check every 60 seconds (adjust interval as needed)
+continuous_monitoring(5)  # Check every 60 seconds (adjust interval as needed)
