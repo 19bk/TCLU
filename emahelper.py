@@ -35,7 +35,7 @@ def analyze_pair(exchange, symbol, timeframes):
     return results
 
 def main():
-    exchange = ccxt.binance()
+    exchange = ccxt.mexc()
     pairs = [
         'ADA/USDT', 'APT/USDT', 'ATOM/USDT', 'AVAX/USDT', 'FTM/USDT',
         'LINK/USDT', 'LTC/USDT', 'MATIC/USDT', 'SOL/USDT', 'BTC/USDT', 'MANA/USDT'
