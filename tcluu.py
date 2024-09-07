@@ -46,6 +46,48 @@ def check_trend(df):
     else:
         return 'Neutral'
 
+def calculate_percentage_move(start_price, end_price):
+    return ((end_price - start_price) / start_price) * 100
+
+def identify_significant_moves(df, min_percent=2, max_percent=4):
+    df['price_change'] = df['close'].pct_change()
+    df['cumulative_change'] = df['price_change'].cumsum()
+    
+    significant_moves = []
+    start_index = 0
+    
+    for i in range(1, len(df)):
+        move = calculate_percentage_move(df['close'][start_index], df['close'][i])
+        if abs(move) >= min_percent:
+            if abs(move) <= max_percent:
+                significant_moves.append((start_index, i, move))
+            start_index = i
+    
+    return significant_moves
+
+def identify_zigzag(df, threshold=1):
+    zigzag_points = []
+    last_extreme = df['close'].iloc[0]
+    last_extreme_index = 0
+    trend = 1  # 1 for uptrend, -1 for downtrend
+
+    for i in range(1, len(df)):
+        current_price = df['close'].iloc[i]
+        move = calculate_percentage_move(last_extreme, current_price)
+
+        if (trend == 1 and current_price < last_extreme) or (trend == -1 and current_price > last_extreme):
+            if abs(move) >= threshold:
+                zigzag_points.append((last_extreme_index, last_extreme))
+                trend *= -1
+                last_extreme = current_price
+                last_extreme_index = i
+        elif (trend == 1 and current_price > last_extreme) or (trend == -1 and current_price < last_extreme):
+            last_extreme = current_price
+            last_extreme_index = i
+
+    zigzag_points.append((last_extreme_index, last_extreme))
+    return zigzag_points
+
 def analyze_pair(exchange, symbol, timeframes):
     results = {}
     for timeframe in timeframes:
@@ -53,21 +95,27 @@ def analyze_pair(exchange, symbol, timeframes):
         df = fetch_crypto_data(exchange, symbol, timeframe, limit)
         df = calculate_ema(df, [20, 50, 200])
         trend = check_trend(df)
-        results[timeframe] = trend
+        
+        significant_moves = identify_significant_moves(df)
+        zigzag_points = identify_zigzag(df)
+        
+        results[timeframe] = {
+            'trend': trend,
+            'significant_moves': significant_moves,
+            'zigzag_points': zigzag_points
+        }
     return results
 
 def check_alignment(pair, results):
     timeframes = ['1m', '5m', '15m', '1h']
-    trends = [results.get(tf, 'Neutral') for tf in timeframes]
+    trends = [results[tf]['trend'] for tf in timeframes]
     
-    if all(trend == 'Bullish' for trend in trends):
-        message = f"4/4 Bullish Match for {pair}: showing a 4/4 Bullish match across all timeframes!"
+    # Check for trend alignment
+    if all(trend == 'Bullish' for trend in trends) or all(trend == 'Bearish' for trend in trends):
+        trend_type = 'Bullish' if trends[0] == 'Bullish' else 'Bearish'
+        message = f"4/4 {trend_type} Match for {pair}: showing a 4/4 {trend_type} match across all timeframes!"
         print(message)
-        send_email(f"4/4 Bullish Match for {pair}", message)
-    elif all(trend == 'Bearish' for trend in trends):
-        message = f"4/4 Bearish Match for {pair}: showing a 4/4 Bearish match across all timeframes!"
-        print(message)
-        send_email(f"4/4 Bearish Match for {pair}", message)
+        send_email(f"4/4 {trend_type} Match for {pair}", message)
     elif trends[:3].count('Bullish') == 3:
         message = f"3/4 Bullish Match for {pair}: showing a 3/4 Bullish match (1m, 5m, 15m)!"
         print(message)
@@ -76,6 +124,18 @@ def check_alignment(pair, results):
         message = f"3/4 Bearish Match for {pair}: showing a 3/4 Bearish match (1m, 5m, 15m)!"
         print(message)
         send_email(f"3/4 Bearish Match for {pair}", message)
+    
+    # Check for significant moves with zig-zag pattern
+    for tf in timeframes:
+        moves = results[tf]['significant_moves']
+        zigzags = results[tf]['zigzag_points']
+        
+        if moves and zigzags:
+            last_move = moves[-1]
+            if len(zigzags) >= 3:  # Ensure we have at least 3 points for a zig-zag
+                message = f"Significant move detected for {pair} on {tf} timeframe: {last_move[2]:.2f}% with zig-zag pattern"
+                print(message)
+                send_email(f"Significant move for {pair} on {tf}", message)
 
 def main():
     exchange = ccxt.mexc()
@@ -92,14 +152,14 @@ def main():
         results = []
         for pair in pairs:
             pair_results = analyze_pair(exchange, pair, timeframes)
-            row = [pair] + [pair_results[tf] for tf in timeframes]
+            row = [pair] + [pair_results[tf]['trend'] for tf in timeframes]
             results.append(row)
             check_alignment(pair, pair_results)
         
         headers = ['Pair'] + timeframes
         print(tabulate(results, headers=headers, tablefmt='grid'))
         
-        time.sleep(300)  # Wait for 1 minute before the next check
+        time.sleep(300)  # Wait for 5 minutes before the next check
 
 if __name__ == "__main__":
     main()
