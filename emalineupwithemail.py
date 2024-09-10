@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+import time  # Import the time module
 
 # Email credentials
 EMAIL_ADDRESS = "onchainurchin@gmail.com"
@@ -78,6 +79,8 @@ def main():
     previous_alert_states = {pair: None for pair in pairs}  # Track previous alert states for each pair
 
     while True:  # Loop indefinitely
+        all_trends = {}  # Store trends for all pairs
+
         for pair in pairs:
             pair_results = analyze_pair(exchange, pair, timeframes)
             
@@ -90,7 +93,10 @@ def main():
             elif all(trend == 'Bearish' for trend in trends):
                 combined_trend = 'Bearish'
             else:
-                combined_trend = 'Neutral'  # If not all bullish or bearish
+                combined_trend = 'Neutral'  # If any are neutral, set to Neutral
+
+            # Store the combined trend for later use
+            all_trends[pair] = combined_trend
 
             # Send alert if the combined trend changes and is not neutral
             if combined_trend != 'Neutral' and combined_trend != previous_alert_states[pair]:
@@ -109,26 +115,33 @@ def main():
         for timeframe in timeframes:
             table.add_column(timeframe, justify="center")
 
-        # Add rows to the table
+        # Add rows to the table with color coding
         for pair in pairs:
-            row = [pair] + [pair_results[tf] for tf in timeframes]
+            row = [pair]
+            for tf in timeframes:
+                trend = pair_results[tf]
+                row.append(Text(trend, style="bold green" if trend == 'Bullish' else "bold red" if trend == 'Bearish' else "bold yellow"))
             table.add_row(*row)
 
         # Print the table
         console.print(table)
 
-        # Color-coded output for trends
+        # Create a table for debugging output
+        debug_table = Table(title="Combined Trend Debugging", style="bold blue")
+        debug_table.add_column("Pair", style="cyan")
+        debug_table.add_column("Combined Trend", style="magenta")
+        debug_table.add_column("Previous State", style="yellow")
+
+        # Add rows to the debug table
         for pair in pairs:
-            combined_trend = previous_alert_states[pair]  # Get the latest trend for the pair
-            if combined_trend is not None:  # Ensure combined_trend is not None
-                if combined_trend == 'Bullish':
-                    console.print(f"{pair}: {Text(combined_trend, style='bold green')}")
-                elif combined_trend == 'Bearish':
-                    console.print(f"{pair}: {Text(combined_trend, style='bold red')}")
-                else:
-                    console.print(f"{pair}: {Text(combined_trend, style='bold yellow')}")
-            else:
-                console.print(f"{pair}: {Text('No trend available', style='bold yellow')}")
+            debug_table.add_row(pair, all_trends[pair], str(previous_alert_states[pair]))
+
+        # Print the debug table
+        console.print(debug_table)
+
+
+        # Delay for 5 minutes (300 seconds)
+        time.sleep(300)
 
 if __name__ == "__main__":
     main()
