@@ -50,7 +50,7 @@ def check_trend(df):
     else:
         return 'Neutral'
 
-def analyze_pair(exchange, symbol, timeframes, previous_states):
+def analyze_pair(exchange, symbol, timeframes):
     results = {}
     for timeframe in timeframes:
         limit = 300  # Fetch enough data for 200 EMA
@@ -58,33 +58,42 @@ def analyze_pair(exchange, symbol, timeframes, previous_states):
         df = calculate_ema(df, [20, 50, 200])
         trend = check_trend(df)
         results[timeframe] = trend
-        
-        # Check for state change and send email if necessary
-        if trend != previous_states[timeframe]:
-            subject = f"Trend Change for {symbol} - {timeframe}"
-            body = f"The trend for {symbol} in {timeframe} timeframe is now: {trend}"
-            send_email(subject, body)
-            previous_states[timeframe] = trend  # Update the previous state
     return results
 
 def main():
-    exchange = ccxt.binance()
+    exchange = ccxt.mexc()
     pairs = [
         'ADA/USDT', 'APT/USDT', 'ATOM/USDT', 'AVAX/USDT', 'FTM/USDT',
         'LINK/USDT', 'LTC/USDT', 'MATIC/USDT', 'SOL/USDT', 'BTC/USDT', 'MANA/USDT'
     ]
-    timeframes = ['1m', '5m', '15m', '1h']
-    
-    previous_states = {pair: {tf: 'Neutral' for tf in timeframes} for pair in pairs}
-    
-    results = []
-    for pair in pairs:
-        pair_results = analyze_pair(exchange, pair, timeframes, previous_states[pair])
-        row = [pair] + [pair_results[tf] for tf in timeframes]
-        results.append(row)
-    
-    headers = ['Pair'] + timeframes
-    print(tabulate(results, headers=headers, tablefmt='grid'))
+    timeframes = ['1m', '5m', '15m', '1h']  # Include 1h in the timeframes for display
+    previous_alert_states = {pair: None for pair in pairs}  # Track previous alert states for each pair
+
+    while True:  # Loop indefinitely
+        for pair in pairs:
+            pair_results = analyze_pair(exchange, pair, timeframes)
+            
+            # Check combined trend for alerts
+            trends = [pair_results[tf] for tf in ['1m', '5m', '15m']]  # Only check these for alerts
+            combined_trend = None
+            
+            if all(trend == 'Bullish' for trend in trends):
+                combined_trend = 'Bullish'
+            elif all(trend == 'Bearish' for trend in trends):
+                combined_trend = 'Bearish'
+            else:
+                combined_trend = 'Neutral'  # If not all bullish or bearish
+
+            # Send alert if the combined trend changes and is not neutral
+            if combined_trend != 'Neutral' and combined_trend != previous_alert_states[pair]:
+                subject = f"Trend Alert for {pair}"
+                body = f"The trend for {pair} is now: {combined_trend} in 1m, 5m, and 15m timeframes."
+                send_email(subject, body)
+                previous_alert_states[pair] = combined_trend  # Update the previous alert state
+
+        # Print results for debugging, including the 1h timeframe
+        headers = ['Pair'] + timeframes
+        print(tabulate([[pair] + [pair_results[tf] for tf in timeframes] for pair in pairs], headers=headers, tablefmt='grid'))
 
 if __name__ == "__main__":
     main()
