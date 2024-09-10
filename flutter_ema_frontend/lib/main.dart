@@ -41,7 +41,7 @@ class _CryptoTrendPageState extends State<CryptoTrendPage> {
 
   Future<void> fetchTrends() async {
     setState(() {
-      isLoading = true;
+      isLoading = true; // Show loading indicator
     });
 
     final response = await http.get(Uri.parse('http://139.84.237.32:5000/trends'));
@@ -50,11 +50,11 @@ class _CryptoTrendPageState extends State<CryptoTrendPage> {
       final Map<String, dynamic> data = json.decode(response.body);
       setState(() {
         trends = data.entries.map((entry) => CryptoTrend.fromJson(entry.key, entry.value)).toList();
-        isLoading = false;
+        isLoading = false; // Hide loading indicator
       });
     } else {
       setState(() {
-        isLoading = false;
+        isLoading = false; // Hide loading indicator
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load trends')),
@@ -69,96 +69,45 @@ class _CryptoTrendPageState extends State<CryptoTrendPage> {
         title: const Text('Crypto Trends'),
         backgroundColor: Colors.blueAccent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: RefreshIndicator( // Add RefreshIndicator
-          onRefresh: fetchTrends, // Call your fetchTrends method
-          child: SingleChildScrollView( // Vertical scrolling
-            child: SingleChildScrollView( // Horizontal scrolling
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text('Pair', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('1m', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('5m', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('15m', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('1h', style: TextStyle(fontWeight: FontWeight.bold))),
-                ],
-                rows: trends.map((trend) {
-                  return DataRow(cells: [
-                    DataCell(Text(trend.pair)),
-                    DataCell(
-                      Text(trend.trends['1m'] ?? 'N/A', style: TextStyle(color: _getTrendColor(trend.trends['1m']))),
-                    ),
-                    DataCell(
-                      Text(trend.trends['5m'] ?? 'N/A', style: TextStyle(color: _getTrendColor(trend.trends['5m']))),
-                    ),
-                    DataCell(
-                      Text(trend.trends['15m'] ?? 'N/A', style: TextStyle(color: _getTrendColor(trend.trends['15m']))),
-                    ),
-                    DataCell(
-                      Text(trend.trends['1h'] ?? 'N/A', style: TextStyle(color: _getTrendColor(trend.trends['1h']))),
-                    ),
-                  ]);
-                }).toList(),
+      body: RefreshIndicator(
+        onRefresh: fetchTrends,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: trends.length,
+          itemBuilder: (context, index) {
+            final trend = trends[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(16.0),
+                title: Text(trend.pair, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('1m: ${trend.trends['1m'] ?? 'N/A'}', style: TextStyle(color: _getTrendColor(trend.trends['1m']))),
+                    Text('5m: ${trend.trends['5m'] ?? 'N/A'}', style: TextStyle(color: _getTrendColor(trend.trends['5m']))),
+                    Text('15m: ${trend.trends['15m'] ?? 'N/A'}', style: TextStyle(color: _getTrendColor(trend.trends['15m']))),
+                    Text('1h: ${trend.trends['1h'] ?? 'N/A'}', style: TextStyle(color: _getTrendColor(trend.trends['1h']))),
+                  ],
+                ),
+                trailing: const Icon(Icons.more_vert),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
   }
-}
 
-class CryptoTrendCard extends StatelessWidget {
-  final CryptoTrend trend;
-
-  const CryptoTrendCard({super.key, required this.trend});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              trend.pair,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.cyan), // Updated from headline6 to titleMedium
-            ),
-            const SizedBox(height: 10),
-            ...['1m', '5m', '15m', '1h'].map((timeframe) => 
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 30,
-                      child: Text(timeframe, style: const TextStyle(color: Colors.grey)),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: trend.trends[timeframe] == 'Up' ? Colors.green : Colors.red,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        trend.trends[timeframe] ?? 'N/A',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  // Function to determine color based on trend
+  Color _getTrendColor(String? trend) {
+    if (trend == 'Up') {
+      return Colors.green; // Bullish
+    } else if (trend == 'Down') {
+      return Colors.red; // Bearish
+    } else {
+      return Colors.grey; // Neutral
+    }
   }
 }
 
@@ -173,16 +122,5 @@ class CryptoTrend {
       pair: pair,
       trends: Map<String, String>.from(json),
     );
-  }
-}
-
-// Function to determine color based on trend
-Color _getTrendColor(String? trend) {
-  if (trend == 'Up') {
-    return Colors.green; // Bullish
-  } else if (trend == 'Down') {
-    return Colors.red; // Bearish
-  } else {
-    return Colors.grey; // Neutral
   }
 }
