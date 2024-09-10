@@ -1,10 +1,10 @@
 import ccxt
 import pandas as pd
-from tabulate import tabulate
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from rich.console import Console
+from rich.table import Table
 from rich.text import Text
 
 # Email credentials
@@ -69,7 +69,6 @@ def analyze_pair(exchange, symbol, timeframes):
     return results
 
 def main():
-    console = Console()  # Create a console instance
     exchange = ccxt.mexc()
     pairs = [
         'ADA/USDT', 'APT/USDT', 'ATOM/USDT', 'AVAX/USDT', 'FTM/USDT',
@@ -104,9 +103,32 @@ def main():
                 send_email(subject, body, pair, combined_trend)  # Pass pair and combined_trend
                 previous_alert_states[pair] = combined_trend  # Update the previous alert state
 
-        # Print results for debugging, including the 1h timeframe
-        headers = ['Pair'] + timeframes
-        print(tabulate([[pair] + [pair_results[tf] for tf in timeframes] for pair in pairs], headers=headers, tablefmt='grid'))
+        # Create a rich table for results
+        table = Table(title="Trend Analysis Results", style="bold green")
+        table.add_column("Pair", style="cyan", no_wrap=True)
+        for timeframe in timeframes:
+            table.add_column(timeframe, justify="center")
+
+        # Add rows to the table
+        for pair in pairs:
+            row = [pair] + [pair_results[tf] for tf in timeframes]
+            table.add_row(*row)
+
+        # Print the table
+        console.print(table)
+
+        # Color-coded output for trends
+        for pair in pairs:
+            combined_trend = previous_alert_states[pair]  # Get the latest trend for the pair
+            if combined_trend is not None:  # Ensure combined_trend is not None
+                if combined_trend == 'Bullish':
+                    console.print(f"{pair}: {Text(combined_trend, style='bold green')}")
+                elif combined_trend == 'Bearish':
+                    console.print(f"{pair}: {Text(combined_trend, style='bold red')}")
+                else:
+                    console.print(f"{pair}: {Text(combined_trend, style='bold yellow')}")
+            else:
+                console.print(f"{pair}: {Text('No trend available', style='bold yellow')}")
 
 if __name__ == "__main__":
     main()
