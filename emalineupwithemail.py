@@ -4,13 +4,18 @@ from tabulate import tabulate
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from rich.console import Console
+from rich.text import Text
 
 # Email credentials
 EMAIL_ADDRESS = "onchainurchin@gmail.com"
 EMAIL_PASSWORD = "bqjt ulmj nsgk drat"
 RECIPIENT_EMAIL = "onchainurchin@gmail.com"
 
-def send_email(subject, body):
+# Create a console instance
+console = Console()
+
+def send_email(subject, body, pair, combined_trend):
     msg = MIMEMultipart()
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = RECIPIENT_EMAIL
@@ -22,7 +27,10 @@ def send_email(subject, body):
         server.starttls()  # Secure the connection
         server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         server.sendmail(EMAIL_ADDRESS, RECIPIENT_EMAIL, msg.as_string())
-        print("Email sent successfully")
+        
+        # Add details about the email sent
+        print(f"Email sent successfully for {pair}, where combined trend is {combined_trend}.")
+        
     except Exception as e:
         print(f"Failed to send email: {e}")
     finally:
@@ -61,10 +69,11 @@ def analyze_pair(exchange, symbol, timeframes):
     return results
 
 def main():
+    console = Console()  # Create a console instance
     exchange = ccxt.mexc()
     pairs = [
         'ADA/USDT', 'APT/USDT', 'ATOM/USDT', 'AVAX/USDT', 'FTM/USDT',
-        'LINK/USDT', 'LTC/USDT', 'MATIC/USDT', 'SOL/USDT', 'BTC/USDT', 'MANA/USDT'
+        'LINK/USDT', 'LTC/USDT', 'SOL/USDT', 'BTC/USDT', 'MANA/USDT'
     ]
     timeframes = ['1m', '5m', '15m', '1h']  # Include 1h in the timeframes for display
     previous_alert_states = {pair: None for pair in pairs}  # Track previous alert states for each pair
@@ -86,9 +95,13 @@ def main():
 
             # Send alert if the combined trend changes and is not neutral
             if combined_trend != 'Neutral' and combined_trend != previous_alert_states[pair]:
+                # Get the 1-hour trend for additional information
+                one_hour_trend = pair_results['1h']  # Assuming '1h' is included in pair_results
+
                 subject = f"Trend Alert for {pair}"
-                body = f"The trend for {pair} is now: {combined_trend} in 1m, 5m, and 15m timeframes."
-                send_email(subject, body)
+                body = f"The trend for {pair} is now: {combined_trend} in 1m, 5m, and 15m timeframes.\n" \
+                       f"1-hour trend status: {one_hour_trend}."
+                send_email(subject, body, pair, combined_trend)  # Pass pair and combined_trend
                 previous_alert_states[pair] = combined_trend  # Update the previous alert state
 
         # Print results for debugging, including the 1h timeframe
