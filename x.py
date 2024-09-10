@@ -1,38 +1,59 @@
 import ccxt
 import pandas as pd
-import ta
+from tabulate import tabulate
+import time  # Import time module
 
-def get_ohlcv(exchange, symbol, timeframe):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe)
+def fetch_crypto_data(exchange, symbol, timeframe, limit):
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-def calculate_trend(data):
-    data['sma50'] = ta.trend.sma_indicator(data['close'], window=50)
-    data['sma200'] = ta.trend.sma_indicator(data['close'], window=200)
+def calculate_ema(df, periods):
+    for period in periods:
+        df[f'EMA_{period}'] = df['close'].ewm(span=period, adjust=False).mean()
+    return df
+
+def check_trend(df):
+    bullish = (df['EMA_20'] > df['EMA_50']) & (df['EMA_50'] > df['EMA_200']) & (df['close'] > df['EMA_20'])
+    bearish = (df['EMA_20'] < df['EMA_50']) & (df['EMA_50'] < df['EMA_200']) & (df['close'] < df['EMA_20'])
     
-    if data['close'].iloc[-1] > data['sma50'].iloc[-1] > data['sma200'].iloc[-1]:
-        return "Bullish"
-    elif data['close'].iloc[-1] < data['sma50'].iloc[-1] < data['sma200'].iloc[-1]:
-        return "Bearish"
+    if bullish.iloc[-1]:
+        return 'Bullish'
+    elif bearish.iloc[-1]:
+        return 'Bearish'
     else:
-        return "Sideways"
+        return 'Neutral'
+
+def analyze_pair(exchange, symbol, timeframes):
+    results = {}
+    for timeframe in timeframes:
+        limit = 300  # Fetch enough data for 200 EMA
+        df = fetch_crypto_data(exchange, symbol, timeframe, limit)
+        df = calculate_ema(df, [20, 50, 200])
+        trend = check_trend(df)
+        results[timeframe] = trend
+    return results
 
 def main():
-    exchange = ccxt.mexc()
-    symbol = 'BTC/USDT'
-    
+    exchange = ccxt.binance()
+    pairs = [
+        'ADA/USDT', 'APT/USDT', 'ATOM/USDT', 'AVAX/USDT', 'FTM/USDT',
+        'LINK/USDT', 'LTC/USDT', 'MATIC/USDT', 'SOL/USDT', 'BTC/USDT', 'MANA/USDT'
+    ]
     timeframes = ['1m', '5m', '15m', '1h']
-
-    trends = {}
-    for timeframe in timeframes:
-        data = get_ohlcv(exchange, symbol, timeframe)
-        trend = calculate_trend(data)
-        trends[timeframe] = trend
-
-    for timeframe, trend in trends.items():
-        print(f'Timeframe: {timeframe}, Trend: {trend}')
+    
+    while True:  # Loop indefinitely
+        results = []
+        for pair in pairs:
+            pair_results = analyze_pair(exchange, pair, timeframes)
+            row = [pair] + [pair_results[tf] for tf in timeframes]
+            results.append(row)
+        
+        headers = ['Pair'] + timeframes
+        print(tabulate(results, headers=headers, tablefmt='grid'))
+        
+        time.sleep(600)  # Sleep for 60 seconds before the next iteration
 
 if __name__ == "__main__":
     main()
