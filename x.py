@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import pandas as pd
 
 # Load the data from the CSV file
@@ -44,3 +45,22 @@ output_file_path = 'transformed_report.csv'
 grouped_df.to_csv(output_file_path, index=False)
 
 print(f'Transformed report saved to {output_file_path}')
+=======
+import ccxt
+
+def get_mexc_symbols():
+    # Create an instance of the MEXC exchange
+    exchange = ccxt.mexc()
+
+    # Load markets from the exchange
+    markets = exchange.load_markets()
+
+    # Extract and print all trading symbols
+    symbols = list(markets.keys())
+    print("Available MEXC Trading Symbols:")
+    for symbol in symbols:
+        print(symbol)
+
+if __name__ == "__main__":
+    get_mexc_symbols()
+>>>>>>> 8475f954632512e7b4e03c5f84b914f9a411fbd6

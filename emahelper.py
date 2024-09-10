@@ -79,6 +79,11 @@ def check_alignment(pair, results):
 
 def main():
     exchange = ccxt.mexc()
+    
+    # Print available markets for debugging
+    markets = exchange.load_markets()
+    print("Available markets:", markets.keys())
+    
     pairs = [
         'ADA/USDT', 'APT/USDT', 'ATOM/USDT', 'AVAX/USDT', 'FTM/USDT',
         'LINK/USDT', 'LTC/USDT', 'MATIC/USDT', 'SOL/USDT', 'BTC/USDT', 'MANA/USDT'
@@ -99,7 +104,7 @@ def main():
         headers = ['Pair'] + timeframes
         print(tabulate(results, headers=headers, tablefmt='grid'))
         
-        time.sleep(300)  # Wait for 1 minute before the next check
+        time.sleep(300)  # Wait for 5 minutes before the next check
 
 if __name__ == "__main__":
     main()
