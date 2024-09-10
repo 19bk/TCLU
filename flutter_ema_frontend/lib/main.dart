@@ -7,7 +7,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class CryptoTrendPage extends StatefulWidget {
-  const CryptoTrendPage({Key? key}) : super(key: key);
+  const CryptoTrendPage({super.key});
 
   @override
   _CryptoTrendPageState createState() => _CryptoTrendPageState();
@@ -66,7 +66,7 @@ class _CryptoTrendPageState extends State<CryptoTrendPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Crypto Trends'),
+        title: const Text('Crypto Trends'),
         backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
@@ -113,7 +113,7 @@ class _CryptoTrendPageState extends State<CryptoTrendPage> {
 class CryptoTrendCard extends StatelessWidget {
   final CryptoTrend trend;
 
-  const CryptoTrendCard({Key? key, required this.trend}) : super(key: key);
+  const CryptoTrendCard({super.key, required this.trend});
 
   @override
   Widget build(BuildContext context) {
