@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 import ccxt
 import pandas as pd
 import numpy as np
-import talib
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 
@@ -24,15 +23,27 @@ def fetch_crypto_data(exchange, symbol, timeframe, limit):
         logging.error(f"Error fetching data for {symbol} on {timeframe}: {str(e)}")
         return None
 
+def calculate_ema(data, period, column='close'):
+    return data[column].ewm(span=period, adjust=False).mean()
+
+def calculate_rsi(data, period=14, column='close'):
+    delta = data[column].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
 def calculate_indicators(df):
     if len(df) < 200:
         logging.warning(f"Not enough data points for EMA calculation. Got {len(df)}, need at least 200.")
         return None
 
-    df['EMA_20'] = talib.EMA(df['close'], timeperiod=20)
-    df['EMA_50'] = talib.EMA(df['close'], timeperiod=50)
-    df['EMA_200'] = talib.EMA(df['close'], timeperiod=200)
-    df['RSI'] = talib.RSI(df['close'], timeperiod=14)
+    df['EMA_20'] = calculate_ema(df, 20)
+    df['EMA_50'] = calculate_ema(df, 50)
+    df['EMA_200'] = calculate_ema(df, 200)
+    df['RSI'] = calculate_rsi(df)
     return df
 
 def determine_trend(df):
