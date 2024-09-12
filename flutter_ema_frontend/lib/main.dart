@@ -242,15 +242,20 @@ class CryptoTrendCard extends StatelessWidget {
   }
 
   Color _getStatusColor(String trend) {
-    switch (trend.toLowerCase()) {
-      case 'up':
-        return Colors.green;
-      case 'down':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+  switch (trend.toLowerCase()) {
+    case 'bullish':
+      return Color(0xFF81C784); // Soft green for Bullish
+    case 'bearish':
+      return Color(0xFFE57373); // Soft red for Bearish
+    case 'neutral':
+      return Color(0xFFB0BEC5); // Muted grey-blue for Neutral
+    default:
+      return Color(0xFFCFD8DC); // Light grey for unexpected values
   }
+}
+
+
+
 
   bool _areAllTimeframesAligned(Map<String, String> trends) {
     return trends.values.toSet().length == 1 && trends.length == 4;
