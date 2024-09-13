@@ -254,9 +254,6 @@ class CryptoTrendCard extends StatelessWidget {
   }
 }
 
-
-
-
   bool _areAllTimeframesAligned(Map<String, String> trends) {
     return trends.values.toSet().length == 1 && trends.length == 4;
   }
