@@ -1,4 +1,4 @@
-In that case, you'll need to modify the `ExecStart` line in the systemd service file to activate the virtual environment and run the script. Here's how you can create a systemd service file for your script located in the root directory and named `test.py`, which runs in the `dev-env` virtual environment:
+
 
 1. Open a new service file using a text editor, such as `nano`, with root privileges:
 ```bash
