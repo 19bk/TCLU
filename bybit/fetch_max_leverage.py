@@ -1,7 +1,7 @@
 import requests
 
 # Bybit API endpoint for futures market info
-URL = "https://api.bybit.com/v2/public/symbols"
+URL = "https://api.bybit.com/v5/market/instruments-info?category=linear"
 
 def get_max_leverage():
     try:
@@ -11,17 +11,17 @@ def get_max_leverage():
         
         data = response.json()
         
-        if data.get("ret_code") != 0:
-            print("Error fetching data from Bybit API:", data.get("ret_msg"))
+        if data.get("retCode") != 0:
+            print("Error fetching data from Bybit API:", data.get("retMsg"))
             return
         
-        symbols = data.get("result", [])
+        symbols = data.get("result", {}).get("list", [])
         leverage_info = []
 
         # Extract maximum leverage for each trading pair
         for symbol in symbols:
-            trading_pair = symbol.get("name")
-            max_leverage = symbol.get("leverage_filter", {}).get("max_leverage", "N/A")
+            trading_pair = symbol.get("symbol")
+            max_leverage = symbol.get("leverageFilter", {}).get("maxLeverage", "N/A")
             leverage_info.append((trading_pair, max_leverage))
         
         # Display the results
