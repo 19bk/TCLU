@@ -146,10 +146,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[900],
+                      foregroundColor: Colors.white,
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      elevation: 0,
+                    ),
                     onPressed: _goToSimulation,
                     child: const Text('Simulate to Target'),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   Expanded(
                     child: TradeLogWidget(
                       tradeHistory: tradeState.tradeHistory,

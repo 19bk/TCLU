@@ -34,7 +34,7 @@ class BalanceCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '\u0024${totalCapital.toStringAsFixed(2)}',
+                '\u0024${totalCapital.toStringAsFixed(0)}',
                 style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.2),
               ),
             ],
@@ -69,12 +69,12 @@ class BalanceCard extends StatelessWidget {
             Text(label, style: TextStyle(color: Colors.white60, fontSize: 12)),
             const SizedBox(height: 2),
             Text(
-              '\u0024${value.toStringAsFixed(2)}',
+              '\u0024${value.toStringAsFixed(0)}',
               style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1.1),
             ),
             const SizedBox(height: 1),
             Text(
-              '(${(value / total * 100).toStringAsFixed(1)}%)',
+              '(${(value / total * 100).round()}%)',
               style: TextStyle(color: Colors.white30, fontSize: 11),
             ),
           ],
