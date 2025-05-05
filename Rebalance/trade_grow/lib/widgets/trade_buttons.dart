@@ -14,6 +14,15 @@ class TradeButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkButtonStyle = ElevatedButton.styleFrom(
+      backgroundColor: Colors.grey[900],
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 0,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -22,13 +31,8 @@ class TradeButtons extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: onWin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                style: darkButtonStyle.copyWith(
+                  backgroundColor: MaterialStateProperty.all(Colors.green[700]),
                 ),
                 child: const Text(
                   'Simulate Win',
@@ -40,13 +44,8 @@ class TradeButtons extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: onLoss,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                style: darkButtonStyle.copyWith(
+                  backgroundColor: MaterialStateProperty.all(Colors.red[700]),
                 ),
                 child: const Text(
                   'Loss',
@@ -59,14 +58,7 @@ class TradeButtons extends StatelessWidget {
         const SizedBox(height: 12),
         ElevatedButton(
           onPressed: onManualRebalance,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
+          style: darkButtonStyle,
           child: const Text(
             'Manual Rebalance',
             style: TextStyle(fontSize: 16),

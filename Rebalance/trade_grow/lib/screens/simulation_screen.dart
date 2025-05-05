@@ -73,6 +73,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   }
 
   Widget _buildStatsBar() {
+    print('Building stats bar');
     final trade = (startAmount ?? 0) * 0.4;
     final reserve = (startAmount ?? 0) * 0.6;
     final mutedGreen = Colors.green[400];
@@ -212,6 +213,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
                       TradeLogWidget(
                         tradeHistory: simulationLog!,
                         showTitle: false,
+                        debugLabel: 'SimulationScreen',
                       ),
                     ]
                   ],

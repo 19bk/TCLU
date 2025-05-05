@@ -129,42 +129,42 @@ class _HomeScreenState extends State<HomeScreen> {
             constraints: const BoxConstraints(maxWidth: 600),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  BalanceCard(
-                    totalCapital: tradeState.totalCapital,
-                    tradeBalance: tradeState.tradeBalance,
-                    reserveBalance: tradeState.reserveBalance,
-                    tradesCount: tradeState.tradesCount,
-                  ),
-                  const SizedBox(height: 24),
-                  TradeButtons(
-                    onWin: _onWin,
-                    onLoss: _onLoss,
-                    onManualRebalance: _onManualRebalance,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[900],
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      elevation: 0,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    BalanceCard(
+                      totalCapital: tradeState.totalCapital,
+                      tradeBalance: tradeState.tradeBalance,
+                      reserveBalance: tradeState.reserveBalance,
+                      tradesCount: tradeState.tradesCount,
                     ),
-                    onPressed: _goToSimulation,
-                    child: const Text('Simulate to Target'),
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: TradeLogWidget(
+                    const SizedBox(height: 24),
+                    TradeButtons(
+                      onWin: _onWin,
+                      onLoss: _onLoss,
+                      onManualRebalance: _onManualRebalance,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[900],
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: _goToSimulation,
+                      child: const Text('Simulate to Target'),
+                    ),
+                    const SizedBox(height: 12),
+                    TradeLogWidget(
                       tradeHistory: tradeState.tradeHistory,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
