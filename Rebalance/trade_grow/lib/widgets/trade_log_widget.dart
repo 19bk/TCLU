@@ -15,61 +15,51 @@ class TradeLogWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Trade Log:',
+          'Trade Log',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: Card(
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white12, width: 1),
             ),
             child: tradeHistory.isEmpty
                 ? const Center(
                     child: Text(
                       'No trades yet',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: Colors.white38,
                         fontSize: 16,
                       ),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(8),
+                : ListView.separated(
+                    padding: const EdgeInsets.all(10),
                     itemCount: tradeHistory.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1, color: Colors.white12),
                     itemBuilder: (context, index) {
                       final trade = tradeHistory[index];
                       final tradeNumber = index + 1;
-                      
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 8,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: trade.isWin ? Colors.green : Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  tradeNumber.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                            Text(
+                              tradeNumber.toString().padLeft(2, '0'),
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,52 +68,56 @@ class TradeLogWidget extends StatelessWidget {
                                     children: [
                                       Text(
                                         'Trade $tradeNumber: ${trade.isWin ? "Win" : "Loss"}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: trade.isWin ? Colors.green : Colors.red,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       if (trade.gain != null)
                                         Text(
-                                          '+\$${trade.gain!.toStringAsFixed(2)}',
+                                          '+\u0024${trade.gain!.toStringAsFixed(2)}',
                                           style: const TextStyle(
                                             color: Colors.green,
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 13,
                                           ),
                                         )
                                       else if (trade.loss != null)
                                         Text(
-                                          '-\$${trade.loss!.toStringAsFixed(2)}',
+                                          '-\u0024${trade.loss!.toStringAsFixed(2)}',
                                           style: const TextStyle(
                                             color: Colors.red,
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 13,
                                           ),
                                         ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   Text(
-                                    'Trade: \$${trade.tradeBalance.toStringAsFixed(2)} | Reserve: \$${trade.reserveBalance.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 13,
+                                    'Trade: \u0024${trade.tradeBalance.toStringAsFixed(2)} | Reserve: \u0024${trade.reserveBalance.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12,
                                     ),
                                   ),
                                   if (trade.transferredFromReserve != null && trade.transferredFromReserve! > 0)
                                     Text(
-                                      '↑ Restored trade balance: +\$${trade.transferredFromReserve!.toStringAsFixed(2)} from reserve',
-                                      style: TextStyle(
-                                        color: Colors.orange[700],
-                                        fontSize: 13,
+                                      'Restored trade balance: +\u0024${trade.transferredFromReserve!.toStringAsFixed(2)} from reserve',
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
                                   if (trade.wasRebalanced)
                                     Text(
-                                      '↺ Rebalanced to 40/60 split',
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.primary,
-                                        fontSize: 13,
+                                      'Rebalanced to 40/60 split',
+                                      style: const TextStyle(
+                                        color: Colors.white38,
+                                        fontSize: 12,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),

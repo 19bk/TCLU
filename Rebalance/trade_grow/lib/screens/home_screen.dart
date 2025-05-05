@@ -3,9 +3,11 @@ import '../models/trade_state.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/trade_buttons.dart';
 import '../widgets/trade_log_widget.dart';
+import 'simulation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final ValueChanged<double>? onCapitalChanged;
+  const HomeScreen({super.key, this.onCapitalChanged});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -33,33 +35,38 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       tradeState = TradeState(initialCapital: initialCapital);
     });
+    widget.onCapitalChanged?.call(initialCapital);
   }
 
   void _onWin() {
     setState(() {
       tradeState.simulateWin();
     });
+    widget.onCapitalChanged?.call(tradeState.totalCapital);
   }
 
   void _onLoss() {
     setState(() {
       tradeState.simulateLoss();
     });
+    widget.onCapitalChanged?.call(tradeState.totalCapital);
   }
 
   void _onManualRebalance() {
     setState(() {
       tradeState.manualRebalance();
     });
+    widget.onCapitalChanged?.call(tradeState.totalCapital);
   }
 
   Future<void> _showInitialCapitalDialog() async {
     _initialCapitalController.text = initialCapital.toString();
-    
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Set Initial Capital'),
+        backgroundColor: Theme.of(context).cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Set Initial Capital', style: TextStyle(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: _initialCapitalController,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -73,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               final newValue = double.tryParse(_initialCapitalController.text);
               if (newValue != null && newValue > 0) {
@@ -91,46 +98,66 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _goToSimulation() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SimulationScreen(
+          startingCapital: tradeState.totalCapital,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 600;
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('TradeGrow - 40/60 Simulator'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text('TradeGrow 40/60 Simulator'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: _showInitialCapitalDialog,
+            tooltip: 'Set Initial Capital',
           ),
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              BalanceCard(
-                totalCapital: tradeState.totalCapital,
-                tradeBalance: tradeState.tradeBalance,
-                reserveBalance: tradeState.reserveBalance,
-                tradesCount: tradeState.tradesCount,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  BalanceCard(
+                    totalCapital: tradeState.totalCapital,
+                    tradeBalance: tradeState.tradeBalance,
+                    reserveBalance: tradeState.reserveBalance,
+                    tradesCount: tradeState.tradesCount,
+                  ),
+                  const SizedBox(height: 24),
+                  TradeButtons(
+                    onWin: _onWin,
+                    onLoss: _onLoss,
+                    onManualRebalance: _onManualRebalance,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: _goToSimulation,
+                    child: const Text('Simulate to Target'),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: TradeLogWidget(
+                      tradeHistory: tradeState.tradeHistory,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              TradeButtons(
-                onWin: _onWin,
-                onLoss: _onLoss,
-                onManualRebalance: _onManualRebalance,
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: TradeLogWidget(
-                  tradeHistory: tradeState.tradeHistory,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

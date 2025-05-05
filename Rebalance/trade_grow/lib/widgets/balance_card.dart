@@ -16,76 +16,70 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white12, width: 1),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBalanceRow(
-              'Total Capital',
-              totalCapital,
-              Theme.of(context).textTheme.titleLarge,
-              null,
-            ),
-            const SizedBox(height: 16),
-            _buildBalanceRow(
-              'Trade',
-              tradeBalance,
-              Theme.of(context).textTheme.titleMedium,
-              '(${(tradeBalance / totalCapital * 100).toStringAsFixed(1)}%)',
-            ),
-            const SizedBox(height: 8),
-            _buildBalanceRow(
-              'Reserve',
-              reserveBalance,
-              Theme.of(context).textTheme.titleMedium,
-              '(${(reserveBalance / totalCapital * 100).toStringAsFixed(1)}%)',
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Trades Made: $tradesCount',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Total Capital',
+                style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              Text(
+                '\u0024${totalCapital.toStringAsFixed(2)}',
+                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _buildBalanceColumn('Trade (40%)', tradeBalance, totalCapital),
+              const SizedBox(width: 10),
+              _buildBalanceColumn('Reserve (60%)', reserveBalance, totalCapital),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text('Trades Made: $tradesCount', style: TextStyle(color: Colors.white54, fontSize: 13)),
+        ],
       ),
     );
   }
 
-  Widget _buildBalanceRow(
-    String label,
-    double amount,
-    TextStyle? style,
-    String? percentage,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: style),
-        Row(
+  Widget _buildBalanceColumn(String label, double value, double total) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.white12, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(label, style: TextStyle(color: Colors.white60, fontSize: 12)),
+            const SizedBox(height: 2),
             Text(
-              '\$${amount.toStringAsFixed(2)}',
-              style: style,
+              '\u0024${value.toStringAsFixed(2)}',
+              style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1.1),
             ),
-            if (percentage != null) ...[
-              const SizedBox(width: 4),
-              Text(
-                percentage,
-                style: style?.copyWith(
-                  fontSize: (style.fontSize ?? 14) * 0.8,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
+            const SizedBox(height: 1),
+            Text(
+              '(${(value / total * 100).toStringAsFixed(1)}%)',
+              style: TextStyle(color: Colors.white30, fontSize: 11),
+            ),
           ],
         ),
-      ],
+      ),
     );
   }
 } 

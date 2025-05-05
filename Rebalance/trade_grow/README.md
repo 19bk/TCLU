@@ -1,16 +1,20 @@
-# trade_grow
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Starting Point
+You begin with a $3,000 account.
+2. Capital Split
+The account is split into:
+40% ($1,200): Actively traded (“trading capital”)
+60% ($1,800): Held in reserve (“reserve capital”)
+3. Trade Mechanics
+Each trade uses the trading capital.
+If you win a trade:
+The trading capital increases by 10% (of its current value).
+If you lose a trade:
+The trading capital decreases by 50% (of its current value).
+If you lose, you use the reserve to replenish the trading capital back to the original 40%/60% split (if possible).
+4. Rebalancing
+After each trade, check if the trading capital has grown to be more than the reserve.
+If so, re-split the total account into 40% trading and 60% reserve again.
+5. Recovery Mechanism
+The reserve acts as a buffer:
+If you lose, you can “top up” the trading capital from the reserve, so you need fewer consecutive wins to recover from a loss.
+This system is designed to reduce the risk of ruin and make recovery from losses easier.
