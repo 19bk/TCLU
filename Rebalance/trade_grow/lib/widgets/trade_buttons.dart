@@ -35,7 +35,7 @@ class TradeButtons extends StatelessWidget {
                   backgroundColor: MaterialStateProperty.all(Colors.green[700]),
                 ),
                 child: const Text(
-                  'Simulate Win',
+                  '+',
                   style: TextStyle(fontSize: 16),
                 ),
               ),
@@ -48,7 +48,7 @@ class TradeButtons extends StatelessWidget {
                   backgroundColor: MaterialStateProperty.all(Colors.red[700]),
                 ),
                 child: const Text(
-                  'Loss',
+                  '-',
                   style: TextStyle(fontSize: 16),
                 ),
               ),

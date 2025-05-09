@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('TradeGrow 40/60 Simulator'),
+        title: const Text('40/60'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
